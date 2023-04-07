@@ -1,7 +1,11 @@
 import { listUsers } from "@/services/user_service"
 
-const test = () => {
+interface CreateUserResult {
+    code: string
+}
+
+const createUser = () => {
     listUsers();
 }
 
-export {test}
+export { createUser }
