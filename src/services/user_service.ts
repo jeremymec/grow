@@ -1,7 +1,7 @@
 import { User } from "@/models/user";
 import { getDBConnection } from "../database";
 import { connect, Connection } from '@planetscale/database'
-import { generateUserCode } from "./user_code_service";
+import { generateUserCode } from "../helpers/user_code";
 const conn = getDBConnection();
 
 const listUsers = async (): Promise<User[]> => {
@@ -11,14 +11,22 @@ const listUsers = async (): Promise<User[]> => {
     return query.rows.map(row => row as User);
 }
 
-
-const createUser = async () => {
+const createUser = async (): Promise<User> => {
     
-    generateUserCode();
+    const code = generateUserCode();
+    console.log("Generated code is ", code)
 
-    // const query = await conn.execute('')
+    const sql = `INSERT INTO users (code) VALUES ('${code}')`
+    const query = await conn.execute(sql);
 
-    
+    if (query.rowsAffected > 0) {
+        return {
+            id: Number(query.insertId),
+            code: code
+        }
+    } else {
+        throw new Error("Error occured when executing user create")
+    }
 }
 
-export { listUsers }
+export { listUsers, createUser }
