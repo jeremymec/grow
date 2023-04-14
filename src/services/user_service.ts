@@ -1,7 +1,7 @@
 import { User } from "@/models/user";
 import { getDBConnection } from "../database";
-import { connect, Connection } from '@planetscale/database'
 import { generateUserCode } from "../helpers/user_code";
+
 const conn = getDBConnection();
 
 const listUsers = async (): Promise<User[]> => {
@@ -14,7 +14,6 @@ const listUsers = async (): Promise<User[]> => {
 const createUser = async (): Promise<User> => {
     
     const code = generateUserCode();
-    console.log("Generated code is ", code)
 
     const sql = `INSERT INTO users (code) VALUES ('${code}')`
     const query = await conn.execute(sql);
@@ -29,4 +28,17 @@ const createUser = async (): Promise<User> => {
     }
 }
 
-export { listUsers, createUser }
+const validateUser = async (code: string): Promise<User | null> => {
+
+    const sql = `SELECT * FROM users WHERE code='${code}'`
+    const query = await conn.execute(sql);
+
+    if (query.size === 1) {
+        return (query.rows[0] as User)
+    } else {
+        return null;
+    }
+
+}
+
+export { listUsers, createUser, validateUser }

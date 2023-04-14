@@ -1,6 +1,8 @@
 import { GetServerSidePropsContext } from "next";
 import { User } from "@/models/user";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
 
 export default function Home() {
   const [currentUser, setCurrentUser] = useState<User>();
@@ -9,17 +11,29 @@ export default function Home() {
   const handleCreateUserClick = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    const response = await fetch("/api/create_user");
+    const response = await fetch("/api/users/create");
 
     response.json().then((data) => {
+      toast("User created successfully")
       setCurrentUser(data);
     });
   };
 
-  const handleLoginClick = (
+  const handleLoginClick = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    console.log(userInput);
+    const response = await fetch(`/api/users/${userInput}`)
+    
+    if (response.ok) {
+      response.json().then((data) => {
+        toast("Login Successful")
+        setCurrentUser(data);
+      })
+    } else {
+      toast("There was a problem logging in with that user code")
+    }
+
+
   };
 
   const loggedInFragment = currentUser && (
@@ -33,6 +47,7 @@ export default function Home() {
       <button onClick={handleLoginClick}>Login</button>
       <br />
       <button onClick={handleCreateUserClick}>Create User</button>
+      <ToastContainer />
     </div>
   );
 
