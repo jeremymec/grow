@@ -1,4 +1,5 @@
-import { createUser, getUserFromCode } from "@/services/user_service"
+import { getUserFromCode } from "@/services/user_service"
+import { listPlantsOfUser } from "@/services/plants_service"
 import { NextApiRequest, NextApiResponse } from "next"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -8,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const user = await getUserFromCode(String(userCode));
 
     if (user){ 
-      return res.status(200).json(user);
+        return res.json(await listPlantsOfUser(user.id))
     } else {
       return res.status(404);
     }

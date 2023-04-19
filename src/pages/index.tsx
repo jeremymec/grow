@@ -1,12 +1,26 @@
 import { GetServerSidePropsContext } from "next";
 import { User } from "@/models/user";
-import { useState } from "react";
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer, toast } from 'react-toastify';
+import { useEffect, useState } from "react";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
+import Plants from "./plants";
+import { Plant } from "@/models/plant";
 
 export default function Home() {
   const [currentUser, setCurrentUser] = useState<User>();
   const [userInput, setUserInput] = useState("");
+  const [plants, setPlants] = useState<Plant[]>([]);
+
+  useEffect(() => {
+    if (currentUser) {
+      const response = fetch(`/api/users/${currentUser.code}/plants`);
+      response.then((res) => {
+        res.json().then((data) => {
+          setPlants(data as Plant[]);
+        });
+      });
+    }
+  }, [currentUser]);
 
   const handleCreateUserClick = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -14,7 +28,7 @@ export default function Home() {
     const response = await fetch("/api/users/create");
 
     response.json().then((data) => {
-      toast("User created successfully")
+      toast("User created successfully");
       setCurrentUser(data);
     });
   };
@@ -22,18 +36,16 @@ export default function Home() {
   const handleLoginClick = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    const response = await fetch(`/api/users/${userInput}`)
-    
+    const response = await fetch(`/api/users/${userInput}`);
+
     if (response.ok) {
       response.json().then((data) => {
-        toast("Login Successful")
+        toast("Login Successful");
         setCurrentUser(data);
-      })
+      });
     } else {
-      toast("There was a problem logging in with that user code")
+      toast("There was a problem logging in with that user code");
     }
-
-
   };
 
   const loggedInFragment = currentUser && (
@@ -42,7 +54,11 @@ export default function Home() {
   const guestFragment = !currentUser && (
     <div>
       <label>
-        User Code: <input value={userInput} onInput={e=> setUserInput((e.target as HTMLTextAreaElement).value)}></input>
+        User Code:{" "}
+        <input
+          value={userInput}
+          onInput={(e) => setUserInput((e.target as HTMLTextAreaElement).value)}
+        ></input>
       </label>
       <button onClick={handleLoginClick}>Login</button>
       <br />
@@ -53,6 +69,7 @@ export default function Home() {
 
   return (
     <div>
+      <Plants plants={plants}></Plants>
       {loggedInFragment}
       {guestFragment}
     </div>

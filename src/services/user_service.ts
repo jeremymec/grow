@@ -28,7 +28,7 @@ const createUser = async (): Promise<User> => {
     }
 }
 
-const validateUser = async (code: string): Promise<User | null> => {
+const getUserFromCode = async (code: string): Promise<User | null> => {
 
     const sql = `SELECT * FROM users WHERE code='${code}'`
     const query = await conn.execute(sql);
@@ -41,4 +41,4 @@ const validateUser = async (code: string): Promise<User | null> => {
 
 }
 
-export { listUsers, createUser, validateUser }
+export { listUsers, createUser, getUserFromCode }
