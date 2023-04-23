@@ -1,4 +1,3 @@
-import { User } from "@/models/user";
 import { Plant } from "@/models/plant";
 import { getDBConnection } from "../database";
 
@@ -11,4 +10,13 @@ const listPlantsOfUser = async (user_id: number): Promise<Plant[]> => {
     return query.rows as Plant[];
 }
 
-export { listPlantsOfUser }
+const createPlantForUser = async (user_id: number): Promise<boolean> => {
+
+    const sql = `INSERT INTO plants (type, user_id) VALUES ('default', ${user_id})`
+    const query = await conn.execute(sql);
+
+    return query.rowsAffected === 1;
+
+}
+
+export { listPlantsOfUser, createPlantForUser }
