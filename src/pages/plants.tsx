@@ -11,7 +11,7 @@ export interface PlantsProps {
 
 export default function Plants(props: PlantsProps) {
 
-  const [waterings, setWaterings] = useState<[Plant, Watering[]]>(new Map());
+  const [waterings, setWaterings] = useState<[Plant, Watering[]][]>([]);
 
   const handleWaterPlantClick = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, plantId: number) => {
     const response = await fetch(`/api/users/${props.userCode}/waterPlant/${plantId}`);
@@ -23,7 +23,7 @@ export default function Plants(props: PlantsProps) {
       return [plant, await getWaterings(plant.id)]
     })
 
-  }, props.plants)
+  })
 
   return (
     <div>

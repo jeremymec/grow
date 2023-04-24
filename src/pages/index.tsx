@@ -5,13 +5,19 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import Plants from "./plants";
 import { Plant } from "@/models/plant";
+import { cookies } from 'next/headers';
 
-export default function Home() {
+export interface IndexProps {
+  userCode: string
+}
+
+export default function Index(props: IndexProps) {
   const [currentUser, setCurrentUser] = useState<User>();
   const [userInput, setUserInput] = useState("");
   const [plants, setPlants] = useState<Plant[]>([]);
 
   useEffect(() => {
+
     if (currentUser) {
       const response = fetch(`/api/users/${currentUser.code}/plants`);
       response.then((res) => {
@@ -25,7 +31,7 @@ export default function Home() {
   const handleCreateUserClick = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    const response = await fetch("/api/users/create");
+    
 
     response.json().then((data) => {
       toast("User created successfully");
@@ -77,6 +83,17 @@ export default function Home() {
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
+
+  const userCode = context.req.cookies['userCode']
+
+  if (cookieStore.has('userCode')) {
+    const code = cookieStore.get('userCode');
+  } else {
+    fetch("/api/users/create").then(res => {
+      
+    })
+  }
+
   return {
     props: {}, // will be passed to the page component as props
   };
