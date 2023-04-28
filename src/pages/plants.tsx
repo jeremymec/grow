@@ -10,20 +10,36 @@ export interface PlantsProps {
 }
 
 export default function Plants(props: PlantsProps) {
+  const [waterings, setWaterings] = useState<{ [plantID: number]: Watering[] }>(
+    {}
+  );
 
-  const [waterings, setWaterings] = useState<[Plant, Watering[]]>(new Map());
-
-  const handleWaterPlantClick = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, plantId: number) => {
-    const response = await fetch(`/api/users/${props.userCode}/waterPlant/${plantId}`);
-  }
+  const handleWaterPlantClick = async (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    plantId: number
+  ) => {
+    const response = await fetch(
+      `/api/users/${props.userCode}/waterPlant/${plantId}`
+    );
+  };
 
   useEffect(() => {
+    const fetchWaterings = async () => {
+      const fetchedWaterings: { [plantID: number]: Watering[] } =
+        props.plants.reduce(
+          async (map, plant) => ({
+            ...map,
+            [plant.id]: await getWaterings(plant.id),
+          }),
+          {}
+        );
+      setWaterings(fetchedWaterings);
+    };
 
-    const waterings = props.plants.map(async plant => {
-      return [plant, await getWaterings(plant.id)]
-    })
-
-  }, props.plants)
+    return () => {
+      fetchWaterings().catch((e) => console.error(e));
+    };
+  }, props.plants);
 
   return (
     <div>
@@ -31,7 +47,12 @@ export default function Plants(props: PlantsProps) {
         return (
           <div>
             <p key={index}>Plant of type {plant.type}</p>
-            <button onClick={e => handleWaterPlantClick(e, plant.id)}>Water Me</button>
+            {waterings[plant.id] && waterings[plant.id].map((watering, index) => {
+              return <p key={index}>Watering at time {watering.time}</p>;
+            })}
+            <button onClick={(e) => handleWaterPlantClick(e, plant.id)}>
+              Water Me
+            </button>
           </div>
         );
       })}
