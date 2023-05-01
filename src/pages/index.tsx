@@ -8,25 +8,23 @@ import { Plant } from "@/models/plant";
 import { cookies } from 'next/headers';
 
 export interface IndexProps {
-  userCode: string
+  user: User
 }
 
 export default function Index(props: IndexProps) {
-  const [currentUser, setCurrentUser] = useState<User>();
+  
   const [userInput, setUserInput] = useState("");
   const [plants, setPlants] = useState<Plant[]>([]);
 
   useEffect(() => {
 
-    if (currentUser) {
-      const response = fetch(`/api/users/${currentUser.code}/plants`);
+      const response = fetch(`/api/users/${props.user.id}/plants`);
       response.then((res) => {
         res.json().then((data) => {
           setPlants(data as Plant[]);
         });
       });
-    }
-  }, [currentUser]);
+  }, [props.user]);
 
   const handleCreateUserClick = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -84,17 +82,32 @@ export default function Index(props: IndexProps) {
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
 
-  const userCode = context.req.cookies['userCode']
+  let user = null;
 
-  if (cookieStore.has('userCode')) {
-    const code = cookieStore.get('userCode');
+  const userCode = context.req.cookies['userCode']
+  let createUser = false;
+
+  if (userCode) {
+    const verifyResponse = await fetch(`/api/users/verify/${userCode}`);
+    if (verifyResponse.ok) {
+      user = await verifyResponse.json() as User
+    } else {
+      createUser = true;
+    }
   } else {
-    fetch("/api/users/create").then(res => {
-      
-    })
+    createUser = true;
+  }
+
+  if (createUser) {
+    const createResponse = await fetch('/api/users/create');
+    user = await createResponse.json() as User
+  }
+
+  if (!user) {
+    throw("An error has occured in the create user flow.")
   }
 
   return {
-    props: {}, // will be passed to the page component as props
+    props: {user: user}, // will be passed to the page component as props
   };
 }
