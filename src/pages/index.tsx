@@ -6,6 +6,8 @@ import { ToastContainer, toast } from "react-toastify";
 import Plants from "./plants";
 import { Plant } from "@/models/plant";
 import { cookies } from 'next/headers';
+import { verifyUser } from "./api/users/verify/[userCode]";
+import { createUser } from "./api/users/create";
 
 export interface IndexProps {
   user: User
@@ -85,26 +87,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   let user = null;
 
   const userCode = context.req.cookies['userCode']
-  let createUser = false;
 
   if (userCode) {
-    const verifyResponse = await fetch(`/api/users/verify/${userCode}`);
-    if (verifyResponse.ok) {
-      user = await verifyResponse.json() as User
-    } else {
-      createUser = true;
-    }
-  } else {
-    createUser = true;
-  }
-
-  if (createUser) {
-    const createResponse = await fetch('/api/users/create');
-    user = await createResponse.json() as User
+    user = await verifyUser(userCode);
   }
 
   if (!user) {
-    throw("An error has occured in the create user flow.")
+    user = await createUser();
   }
 
   return {

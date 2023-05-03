@@ -11,7 +11,7 @@ const listUsers = async (): Promise<User[]> => {
     return query.rows.map(row => row as User);
 }
 
-const createUser = async (): Promise<User> => {
+const newUser = async (): Promise<User> => {
     
     const code = generateUserCode();
 
@@ -41,4 +41,4 @@ const getUserFromCode = async (code: string): Promise<User | null> => {
 
 }
 
-export { listUsers, createUser, getUserFromCode }
+export { listUsers, newUser, getUserFromCode }

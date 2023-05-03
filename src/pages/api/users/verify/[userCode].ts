@@ -1,11 +1,13 @@
-import { createUser, getUserFromCode } from "@/services/user_service"
+import { User } from "@/models/user";
+import { getUserFromCode } from "@/services/user_service"
 import { NextApiRequest, NextApiResponse } from "next"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { userCode } = req.query;
 
   try {
-    const user = await getUserFromCode(String(userCode));
+    
+    const user = verifyUser(String(userCode));
 
     if (user){ 
       return res.status(200).json(user);
@@ -16,4 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (err) {
     return res.status(501);
   }
+}
+
+export const verifyUser = async (userCode: string): Promise<User | null> => {
+  return await getUserFromCode(userCode);
 }
